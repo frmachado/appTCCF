@@ -19,16 +19,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const SPRITES = require("../../../assets/imagens/sprites.png");
 
-/*
-  A imagem sprites.png é um SPRITE SHEET.
-
-  Cada Sprite abaixo recorta uma região da imagem.
-  Os valores são baseados no sprites.png que criamos.
-
-  Se posteriormente você quiser separar os sprites em
-  arquivos individuais, também podemos fazer.
-*/
-
 const Sprite = ({
   x,
   y,
@@ -36,118 +26,100 @@ const Sprite = ({
   height,
   displayWidth,
   displayHeight,
+  rotation = "0deg",
 }) => {
+  // O recorte usa as dimensões reais da sprites.png (1536 x 1024).
   const scaleX = displayWidth / width;
   const scaleY = displayHeight / height;
+  const girado = rotation === "90deg" || rotation === "-90deg" || rotation === "270deg";
 
   return (
     <View
       style={{
-        width: displayWidth,
-        height: displayHeight,
-        overflow: "hidden",
+        width: girado ? displayHeight : displayWidth,
+        height: girado ? displayWidth : displayHeight,
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "visible",
       }}
     >
-      <Image
-        source={SPRITES}
-        resizeMode="stretch"
+      <View
         style={{
-          position: "absolute",
-          width: 1536 * scaleX,
-          height: 1024 * scaleY,
-          left: -x * scaleX,
-          top: -y * scaleY,
+          width: displayWidth,
+          height: displayHeight,
+          overflow: "hidden",
+          transform: [{ rotate: rotation }],
         }}
-      />
+      >
+        <Image
+          source={SPRITES}
+          resizeMode="stretch"
+          style={{
+            position: "absolute",
+            width: 1536 * scaleX,
+            height: 1024 * scaleY,
+            left: -x * scaleX,
+            top: -y * scaleY,
+          }}
+        />
+      </View>
     </View>
   );
 };
 
 /* =========================================================
-   SPRITES DOS CARROS
+   SPRITES DOS CARROS — RECORTES DA LINHA SUPERIOR
    ========================================================= */
-
-const CarroVermelho = ({ style }) => (
-  <View style={style}>
-    <Sprite
-      x={20}
-      y={75}
-      width={305}
-      height={125}
-      displayWidth={105}
-      displayHeight={72}
-    />
-  </View>
+const CarroVermelho = () => (
+  <Sprite x={27} y={80} width={100} height={165} displayWidth={43} displayHeight={72} rotation="90deg" />
 );
 
-const CarroAzul = ({ style }) => (
-  <View style={style}>
-    <Sprite
-      x={355}
-      y={75}
-      width={310}
-      height={125}
-      displayWidth={105}
-      displayHeight={72}
-    />
-  </View>
+const CarroAzul = () => (
+  <Sprite x={140} y={80} width={100} height={165} displayWidth={43} displayHeight={72} rotation="90deg" />
 );
 
-const CarroBranco = ({ style }) => (
-  <View style={style}>
-    <Sprite
-      x={670}
-      y={75}
-      width={235}
-      height={125}
-      displayWidth={105}
-      displayHeight={72}
-    />
-  </View>
-);
-
-const CarroAmarelo = ({ style }) => (
-  <View style={style}>
-    <Sprite
-      x={925}
-      y={75}
-      width={250}
-      height={125}
-      displayWidth={105}
-      displayHeight={72}
-    />
-  </View>
-);
-
-const CarroPreto = ({ style }) => (
-  <View style={style}>
-    <Sprite
-      x={1210}
-      y={75}
-      width={310}
-      height={125}
-      displayWidth={105}
-      displayHeight={72}
-    />
-  </View>
+const CarroAmarelo = () => (
+  <Sprite x={365} y={80} width={100} height={165} displayWidth={43} displayHeight={72} rotation="90deg" />
 );
 
 /* =========================================================
-   SPRITE DO PEDESTRE
+   PERSONAGENS — HOMEM, MULHER E IDOSO
    ========================================================= */
+const PERSONAGENS = {
+  homem: {
+    label: "Homem",
+    frames: [31, 98, 165, 232, 299, 386, 453, 520, 587, 674, 741],
+    y: 320, width: 58, height: 116,
+  },
+  mulher: {
+    label: "Mulher",
+    frames: [875, 942, 1009, 1076, 1143],
+    y: 320, width: 58, height: 116,
+  },
+  idoso: {
+    label: "Idoso",
+    frames: [1217, 1284, 1351, 1418, 1485],
+    y: 320, width: 48, height: 116,
+  },
+};
 
-const Pedestre = ({ style }) => (
-  <View style={style}>
-    <Sprite
-      x={30}
-      y={310}
-      width={95}
-      height={125}
-      displayWidth={48}
-      displayHeight={62}
-    />
-  </View>
-);
+const Pedestre = ({ style, personagem = "homem", frameIndex = 0 }) => {
+  const sprite = PERSONAGENS[personagem] || PERSONAGENS.homem;
+  const frameX = sprite.frames[frameIndex % sprite.frames.length];
+
+  return (
+    <View style={style} pointerEvents="none">
+      <Sprite
+        x={frameX}
+        y={sprite.y}
+        width={sprite.width}
+        height={sprite.height}
+        displayWidth={34}
+        displayHeight={52}
+      />
+    </View>
+  );
+};
 
 /* =========================================================
    PERGUNTAS
@@ -165,7 +137,6 @@ const perguntas = [
     ],
     correta: 2,
   },
-
   {
     pergunta: "O que significa o sinal vermelho do semáforo?",
     alternativas: [
@@ -176,7 +147,6 @@ const perguntas = [
     ],
     correta: 1,
   },
-
   {
     pergunta: "O que o motorista deve fazer antes de atravessar uma faixa?",
     alternativas: [
@@ -187,7 +157,6 @@ const perguntas = [
     ],
     correta: 2,
   },
-
   {
     pergunta: "O cinto de segurança deve ser utilizado por quem?",
     alternativas: [
@@ -198,7 +167,6 @@ const perguntas = [
     ],
     correta: 2,
   },
-
   {
     pergunta: "Qual é uma atitude segura ao dirigir em uma área escolar?",
     alternativas: [
@@ -209,7 +177,6 @@ const perguntas = [
     ],
     correta: 1,
   },
-
   {
     pergunta: "O uso do celular enquanto dirige pode:",
     alternativas: [
@@ -220,7 +187,6 @@ const perguntas = [
     ],
     correta: 2,
   },
-
   {
     pergunta: "Quando estiver dirigindo sob chuva, o motorista deve:",
     alternativas: [
@@ -231,7 +197,6 @@ const perguntas = [
     ],
     correta: 1,
   },
-
   {
     pergunta: "O capacete é obrigatório para:",
     alternativas: [
@@ -242,7 +207,6 @@ const perguntas = [
     ],
     correta: 0,
   },
-
   {
     pergunta: "O sinal amarelo do semáforo indica:",
     alternativas: [
@@ -253,234 +217,213 @@ const perguntas = [
     ],
     correta: 0,
   },
-
-  {
-    pergunta: "Antes de mudar de faixa, o motorista deve:",
-    alternativas: [
-      "Olhar os retrovisores e sinalizar",
-      "Acelerar sem olhar",
-      "Frear bruscamente",
-      "Buzinar e mudar imediatamente",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "A faixa de pedestres existe principalmente para:",
-    alternativas: [
-      "Estacionamento",
-      "Ultrapassagem",
-      "Travessia de pedestres",
-      "Parada de ônibus",
-    ],
-    correta: 2,
-  },
-
-  {
-    pergunta: "O motorista deve dar preferência ao pedestre na faixa?",
-    alternativas: [
-      "Sim, respeitando as regras de circulação",
-      "Nunca",
-      "Somente à noite",
-      "Somente quando houver policial",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "Dirigir após consumir bebida alcoólica pode:",
-    alternativas: [
-      "Aumentar os reflexos",
-      "Diminuir a capacidade de reação",
-      "Melhorar a concentração",
-      "Não causar nenhum efeito",
-    ],
-    correta: 1,
-  },
-
-  {
-    pergunta: "Qual equipamento ajuda a proteger motociclistas?",
-    alternativas: [
-      "Capacete",
-      "Guarda-chuva",
-      "Óculos escuros apenas",
-      "Chinelo",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "O que significa uma placa de PARE?",
-    alternativas: [
-      "Reduzir um pouco",
-      "Parar obrigatoriamente",
-      "Acelerar",
-      "Estacionar",
-    ],
-    correta: 1,
-  },
-
-  {
-    pergunta: "Em uma via movimentada, o pedestre deve:",
-    alternativas: [
-      "Correr entre os veículos",
-      "Usar a faixa de pedestres quando disponível",
-      "Atravessar sem olhar",
-      "Andar pelo meio da rua",
-    ],
-    correta: 1,
-  },
-
-  {
-    pergunta: "O motorista deve respeitar o limite de velocidade?",
-    alternativas: [
-      "Sim",
-      "Somente em rodovias",
-      "Somente quando houver fiscalização",
-      "Não",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "O acostamento deve ser usado normalmente para ultrapassagens?",
-    alternativas: [
-      "Sim",
-      "Não",
-      "Somente durante o dia",
-      "Sempre que houver trânsito",
-    ],
-    correta: 1,
-  },
-
-  {
-    pergunta: "Quando um veículo de emergência se aproxima com sirene e luzes acionadas, devemos:",
-    alternativas: [
-      "Acelerar",
-      "Facilitar sua passagem",
-      "Bloquear a via",
-      "Ignorar",
-    ],
-    correta: 1,
-  },
-
-  {
-    pergunta: "O motorista deve manter distância segura do veículo da frente?",
-    alternativas: [
-      "Sim",
-      "Não",
-      "Somente em estradas",
-      "Somente em congestionamentos",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "A buzina deve ser utilizada:",
-    alternativas: [
-      "De forma moderada e quando necessária",
-      "Continuamente",
-      "Para pressionar pedestres",
-      "Em qualquer situação",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "O pedestre deve olhar para os dois lados antes de atravessar?",
-    alternativas: [
-      "Sim",
-      "Não",
-      "Somente quando estiver chovendo",
-      "Somente à noite",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "Usar o celular enquanto atravessa a rua pode:",
-    alternativas: [
-      "Aumentar a atenção",
-      "Diminuir a atenção",
-      "Melhorar a visão",
-      "Facilitar a travessia",
-    ],
-    correta: 1,
-  },
-
-  {
-    pergunta: "Crianças pequenas devem atravessar a rua:",
-    alternativas: [
-      "Sozinhas",
-      "Acompanhadas por um adulto responsável",
-      "Correndo",
-      "Entre os carros",
-    ],
-    correta: 1,
-  },
-
-  {
-    pergunta: "Em uma motocicleta, o passageiro deve:",
-    alternativas: [
-      "Usar capacete",
-      "Ficar em pé",
-      "Sentar de lado obrigatoriamente",
-      "Não utilizar proteção",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "Ao encontrar uma faixa de pedestres sem semáforo, o motorista deve:",
-    alternativas: [
-      "Acelerar",
-      "Prestar atenção e dar preferência quando aplicável",
-      "Ignorar",
-      "Buzinar para o pedestre sair",
-    ],
-    correta: 1,
-  },
-
-  {
-    pergunta: "Qual comportamento ajuda a evitar acidentes?",
-    alternativas: [
-      "Dirigir de forma defensiva",
-      "Acelerar constantemente",
-      "Usar celular",
-      "Ultrapassar em local proibido",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "O farol deve ser utilizado adequadamente para:",
-    alternativas: [
-      "Aumentar a segurança e visibilidade",
-      "Ofuscar outros motoristas",
-      "Forçar ultrapassagens",
-      "Substituir a buzina",
-    ],
-    correta: 0,
-  },
-
-  {
-    pergunta: "O motorista deve respeitar ciclistas?",
-    alternativas: [
-      "Sim",
-      "Não",
-      "Somente em ciclovias",
-      "Somente quando houver fiscalização",
-    ],
-    correta: 0,
-  },
-
   {
     pergunta: "Ao atravessar uma rua, o pedestre deve:",
     alternativas: [
-      "Prestar atenção ao trânsito",
-      "Usar o celular olhando para baixo",
-      "Correr sem olhar",
-      "Atravessar entre carros estacionados",
+      "Olhar apenas para a direita",
+      "Olhar para os dois lados",
+      "Correr sem observar",
+      "Usar o celular",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "A faixa de pedestres serve para:",
+    alternativas: [
+      "Estacionar veículos",
+      "Facilitar a travessia de pedestres",
+      "Permitir ultrapassagens",
+      "Aumentar a velocidade",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Uma pessoa idosa atravessando a rua precisa de:",
+    alternativas: [
+      "Pressa",
+      "Atenção e respeito dos motoristas",
+      "Buzinas para andar mais rápido",
+      "Ajuda para correr",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Ao se aproximar de uma faixa de pedestres, o motorista deve:",
+    alternativas: [
+      "Acelerar",
+      "Reduzir a velocidade e dar preferência quando necessário",
+      "Desviar pela contramão",
+      "Ignorar os pedestres",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Andar pela calçada é importante porque:",
+    alternativas: [
+      "É o espaço destinado à circulação de pedestres",
+      "É mais rápido para carros",
+      "Evita semáforos",
+      "Permite estacionar motos",
+    ],
+    correta: 0,
+  },
+  {
+    pergunta: "O que fazer antes de atravessar entre carros estacionados?",
+    alternativas: [
+      "Atravessar imediatamente",
+      "Procurar um local seguro com boa visibilidade",
+      "Fechar os olhos",
+      "Correr para a rua",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Dirigir após consumir álcool:",
+    alternativas: [
+      "É seguro em ruas vazias",
+      "Reduz os riscos",
+      "Compromete os reflexos e é proibido",
+      "É permitido em baixa velocidade",
+    ],
+    correta: 2,
+  },
+  {
+    pergunta: "O motorista deve respeitar os limites de velocidade para:",
+    alternativas: [
+      "Evitar acidentes e proteger todos",
+      "Chegar sempre atrasado",
+      "Usar menos os freios apenas",
+      "Ultrapassar mais veículos",
+    ],
+    correta: 0,
+  },
+  {
+    pergunta: "Ao ouvir uma sirene de emergência, o motorista deve:",
+    alternativas: [
+      "Disputar espaço",
+      "Facilitar a passagem com segurança",
+      "Acelerar atrás do veículo",
+      "Parar no meio do cruzamento",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Para andar de bicicleta com mais segurança, é importante:",
+    alternativas: [
+      "Ignorar a sinalização",
+      "Respeitar as regras de trânsito e usar equipamentos de proteção",
+      "Andar sempre na contramão",
+      "Usar o celular pedalando",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Ao atravessar com uma criança, o adulto deve:",
+    alternativas: [
+      "Deixá-la correr na frente",
+      "Segurá-la e escolher um local seguro",
+      "Atravessar fora da faixa sempre",
+      "Olhar somente para o semáforo",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "O que é direção defensiva?",
+    alternativas: [
+      "Dirigir de forma a prevenir riscos e acidentes",
+      "Dirigir sempre rápido",
+      "Buzinar para todos",
+      "Confiar apenas nos outros motoristas",
+    ],
+    correta: 0,
+  },
+  {
+    pergunta: "Em uma rua sem calçada, o pedestre deve:",
+    alternativas: [
+      "Caminhar com atenção, preferencialmente de frente para os veículos",
+      "Andar no meio da pista sem observar",
+      "Caminhar olhando o celular",
+      "Correr entre os carros",
+    ],
+    correta: 0,
+  },
+  {
+    pergunta: "Por que é importante usar a seta antes de virar?",
+    alternativas: [
+      "Para comunicar a intenção aos outros usuários da via",
+      "Para ter preferência sempre",
+      "Para aumentar a velocidade",
+      "Para dispensar os espelhos",
+    ],
+    correta: 0,
+  },
+  {
+    pergunta: "Em um cruzamento, o motorista deve:",
+    alternativas: [
+      "Acelerar para passar primeiro",
+      "Observar a sinalização e os demais usuários",
+      "Olhar somente para frente",
+      "Usar a buzina continuamente",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "O que fazer ao encontrar um semáforo apagado?",
+    alternativas: [
+      "Passar sem reduzir",
+      "Redobrar a atenção e agir com prudência",
+      "Acelerar para liberar a via",
+      "Ignorar os outros veículos",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "A buzina deve ser usada:",
+    alternativas: [
+      "De forma prolongada em qualquer situação",
+      "Como advertência breve quando necessário",
+      "Para apressar pedestres idosos",
+      "No lugar dos freios",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Por que não se deve parar sobre a faixa de pedestres?",
+    alternativas: [
+      "Porque bloqueia a travessia segura",
+      "Porque a faixa é exclusiva para motos",
+      "Porque aumenta a largura da rua",
+      "Porque obriga os pedestres a correr",
+    ],
+    correta: 0,
+  },
+  {
+    pergunta: "Ao sair de uma garagem, o motorista deve:",
+    alternativas: [
+      "Sair rapidamente",
+      "Observar a calçada e a circulação de pedestres",
+      "Buzinar e não olhar",
+      "Usar a calçada como pista",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Qual atitude ajuda a proteger pessoas com mobilidade reduzida?",
+    alternativas: [
+      "Estacionar sobre rampas",
+      "Manter rampas e calçadas desobstruídas",
+      "Bloquear a faixa de pedestres",
+      "Apressar a travessia",
+    ],
+    correta: 1,
+  },
+  {
+    pergunta: "Ao atravessar uma via com semáforo para pedestres, deve-se:",
+    alternativas: [
+      "Observar o sinal e verificar se os veículos pararam",
+      "Atravessar sem olhar",
+      "Seguir os veículos que estão virando",
+      "Correr sempre",
     ],
     correta: 0,
   },
@@ -530,6 +473,10 @@ export default function Jogo({ navigation }) {
 
   const [jogoFinalizado, setJogoFinalizado] = useState(false);
 
+  const [personagemSelecionado, setPersonagemSelecionado] = useState("homem");
+  const [atravessando, setAtravessando] = useState(false);
+  const [framePedestre, setFramePedestre] = useState(0);
+
   /* =======================================================
      ANIMAÇÕES
      ======================================================= */
@@ -550,58 +497,97 @@ export default function Jogo({ navigation }) {
      MOVIMENTO DOS CARROS
      ======================================================= */
 
-  useEffect(() => {
-    iniciarCarros();
+  const animacoesCarros = useRef([]);
 
-    return () => {};
-  }, []);
+  const pararCarros = () => {
+    animacoesCarros.current.forEach((animacao) => animacao.stop());
+    animacoesCarros.current = [];
+    carro1X.stopAnimation();
+    carro2X.stopAnimation();
+    carro3X.stopAnimation();
+  };
 
   const iniciarCarros = () => {
-    carro1X.setValue(-150);
-    carro2X.setValue(SCREEN_WIDTH + 150);
-    carro3X.setValue(-180);
+    pararCarros();
 
-    Animated.loop(
-      Animated.timing(carro1X, {
-        toValue: SCREEN_WIDTH + 150,
-        duration: 6500,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
+    const inicio = -85;
+    const fim = SCREEN_WIDTH + 85;
+    const duracao = 6500;
 
-    Animated.loop(
-      Animated.timing(carro2X, {
-        toValue: -150,
-        duration: 7200,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
+    const criarLoop = (posicao, posicaoInicial) => {
+      posicao.setValue(posicaoInicial);
+      const distanciaRestante = Math.max(100, fim - posicaoInicial);
+      const duracaoRestante = Math.max(1200, duracao * distanciaRestante / (fim - inicio));
 
-    Animated.loop(
-      Animated.timing(carro3X, {
-        toValue: SCREEN_WIDTH + 150,
-        duration: 8500,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
+      const ciclo = Animated.loop(
+        Animated.sequence([
+          Animated.timing(posicao, {
+            toValue: fim,
+            duration: duracaoRestante,
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }),
+          Animated.timing(posicao, {
+            toValue: inicio,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      animacoesCarros.current.push(ciclo);
+      ciclo.start();
+    };
+
+    // Os três veículos começam distribuídos na tela e seguem para a direita.
+    criarLoop(carro1X, -75);
+    criarLoop(carro2X, SCREEN_WIDTH * 0.32);
+    criarLoop(carro3X, SCREEN_WIDTH * 0.66);
   };
+
+  useEffect(() => {
+    iniciarCarros();
+    return () => {
+      pararCarros();
+      pedestreY.stopAnimation();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!atravessando) {
+      setFramePedestre(0);
+      return undefined;
+    }
+
+    const totalFrames = PERSONAGENS[personagemSelecionado].frames.length;
+    const intervalo = setInterval(() => {
+      setFramePedestre((anterior) => (anterior + 1) % totalFrames);
+    }, 120);
+
+    return () => clearInterval(intervalo);
+  }, [atravessando, personagemSelecionado]);
 
   /* =======================================================
      PEDESTRE
      ======================================================= */
 
   const atravessarPedestre = () => {
+    // Os veículos param durante a travessia para dar preferência ao pedestre.
+    pararCarros();
+    setAtravessando(true);
+    setFramePedestre(0);
     pedestreY.setValue(0);
 
     Animated.timing(pedestreY, {
-      toValue: 150,
-      duration: 1500,
+      toValue: -230,
+      duration: 2200,
       easing: Easing.inOut(Easing.ease),
       useNativeDriver: true,
-    }).start();
+    }).start(({ finished }) => {
+      if (finished) {
+        setAtravessando(false);
+        iniciarCarros();
+      }
+    });
   };
 
   /* =======================================================
@@ -876,23 +862,6 @@ export default function Jogo({ navigation }) {
             ))}
           </View>
 
-          {/* PEDRESTE */}
-
-          <Animated.View
-            style={[
-              styles.pedestre,
-              {
-                transform: [
-                  {
-                    translateY: pedestreY,
-                  },
-                ],
-              },
-            ]}
-          >
-            <Pedestre />
-          </Animated.View>
-
         </View>
 
         {/* RUA */}
@@ -914,14 +883,15 @@ export default function Jogo({ navigation }) {
 
           </View>
 
-          {/* LINHA CENTRAL */}
-
-          <View style={styles.linhaCentral}>
-            <View style={styles.linhaPontilhada} />
-            <View style={styles.linhaPontilhada} />
-            <View style={styles.linhaPontilhada} />
-            <View style={styles.linhaPontilhada} />
-            <View style={styles.linhaPontilhada} />
+          {/* DUAS LINHAS TRACEJADAS SEPARAM AS TRÊS FAIXAS */}
+          <View pointerEvents="none" style={styles.divisoriasFaixas}>
+            {[0, 1].map((item) => (
+              <View key={item} style={styles.divisoriaFaixa}>
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <View key={index} style={styles.tracoDivisoria} />
+                ))}
+              </View>
+            ))}
           </View>
 
           {/* CARRO VERMELHO */}
@@ -1001,6 +971,42 @@ export default function Jogo({ navigation }) {
 
         </View>
 
+        {/* PERSONAGEM SOBRE O CENÁRIO: NÃO FICA CORTADO PELA CALÇADA */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.pedestreMovimento,
+            { transform: [{ translateY: pedestreY }] },
+          ]}
+        >
+          <Pedestre personagem={personagemSelecionado} frameIndex={framePedestre} />
+        </Animated.View>
+
+      </View>
+
+      {/* ESCOLHA DO PERSONAGEM */}
+      <View style={styles.seletorPersonagem}>
+        <Text style={styles.seletorTitulo}>Escolha o personagem:</Text>
+        {Object.entries(PERSONAGENS).map(([chave, item]) => (
+          <TouchableOpacity
+            key={chave}
+            style={[
+              styles.botaoPersonagem,
+              personagemSelecionado === chave && styles.botaoPersonagemAtivo,
+            ]}
+            onPress={() => setPersonagemSelecionado(chave)}
+            disabled={respondendo}
+          >
+            <Text
+              style={[
+                styles.textoBotaoPersonagem,
+                personagemSelecionado === chave && styles.textoBotaoPersonagemAtivo,
+              ]}
+            >
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       {/* ===================================================
@@ -1020,9 +1026,8 @@ export default function Jogo({ navigation }) {
               style={[
                 styles.progresso,
                 {
-                  width: `${
-                    ((perguntaAtual + 1) / 10) * 100
-                  }%`,
+                  width: `${((perguntaAtual + 1) / 10) * 100
+                    }%`,
                 },
               ]}
             />
@@ -1096,7 +1101,7 @@ export default function Jogo({ navigation }) {
                   styles.alternativa,
                   { backgroundColor },
                   selecionada &&
-                    styles.alternativaSelecionada,
+                  styles.alternativaSelecionada,
                 ]}
                 onPress={() => responder(index)}
                 disabled={respondendo}
@@ -1200,25 +1205,34 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  /* CENÁRIO */
+  /* CENÁRIO DO JOGO */
 
   cenario: {
+    width: "100%",
     height: 300,
-    backgroundColor: "#333",
+    backgroundColor: "#85888C",
+    overflow: "hidden",
+    position: "relative",
   },
 
   calcadaSuperior: {
     height: 70,
-    backgroundColor: "#7C7F83",
+    width: "100%",
+    backgroundColor: "#85888C",
     position: "relative",
     overflow: "hidden",
+    borderBottomWidth: 4,
+    borderBottomColor: "#E4B52C",
   },
 
   calcadaInferior: {
     height: 70,
-    backgroundColor: "#7C7F83",
+    width: "100%",
+    backgroundColor: "#85888C",
     position: "relative",
     overflow: "hidden",
+    borderTopWidth: 4,
+    borderTopColor: "#E4B52C",
   },
 
   pisoCalcada: {
@@ -1230,89 +1244,134 @@ const styles = StyleSheet.create({
   },
 
   blocoCalcada: {
-    width: SCREEN_WIDTH / 8,
+    width: "12.5%",
     height: 35,
     borderWidth: 0.5,
     borderColor: "#A7A9AC",
     backgroundColor: "#85888C",
   },
 
+  /* RUA */
+
   rua: {
     height: 160,
+    width: "100%",
     backgroundColor: "#292C32",
     position: "relative",
     overflow: "hidden",
-    borderTopWidth: 4,
-    borderTopColor: "#E4B52C",
-    borderBottomWidth: 4,
-    borderBottomColor: "#E4B52C",
   },
 
-  /* FAIXA */
+  /* FAIXA DE PEDESTRES */
 
   faixa: {
     position: "absolute",
     width: 105,
-    height: 160,
-    left: SCREEN_WIDTH / 2 - 52,
+    height: "100%",
+    left: "50%",
+    marginLeft: -52.5,
     top: 0,
     justifyContent: "space-evenly",
     alignItems: "center",
-    zIndex: 5,
+    zIndex: 2,
   },
 
   faixaLinha: {
     width: 88,
-    height: 13,
-    backgroundColor: "#F4F4F4",
+    height: 12,
+    backgroundColor: "#F5F5F5",
     borderRadius: 2,
   },
 
-  linhaCentral: {
+  /* DUAS DIVISÓRIAS TRACEJADAS: TRÊS FAIXAS */
+  divisoriasFaixas: {
     position: "absolute",
+    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    top: 75,
-    height: 4,
     flexDirection: "row",
-    justifyContent: "space-around",
-    opacity: 0.8,
+    justifyContent: "space-evenly",
+    zIndex: 1,
   },
 
-  linhaPontilhada: {
-    width: 38,
-    height: 3,
-    backgroundColor: "#E8E8E8",
+  divisoriaFaixa: {
+    height: "100%",
+    width: 3,
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+
+  tracoDivisoria: {
+    width: 3,
+    height: 10,
+    borderRadius: 2,
+    backgroundColor: "#F6D85A",
   },
 
   /* CARROS */
 
+
   carro: {
     position: "absolute",
-    width: 105,
-    height: 72,
-    zIndex: 4,
+    width: 72,
+    height: 43,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 5,
+    overflow: "visible",
   },
 
-  carroLinha1: {
-    top: 15,
-  },
+  carroLinha1: { top: 8 },
+  carroLinha2: { top: 69 },
+  carroLinha3: { top: 130 },
 
-  carroLinha2: {
-    top: 85,
-  },
-
-  carroLinha3: {
-    top: 35,
-  },
-
-  /* PEDESTRE */
-
-  pedestre: {
+  /* PEDESTRE: SOBRE O CENÁRIO TODO, PARA NÃO SER CORTADO */
+  pedestreMovimento: {
     position: "absolute",
-    left: SCREEN_WIDTH / 2 - 24,
-    top: 5,
+    left: "50%",
+    marginLeft: -19,
+    top: 235,
+    width: 38,
+    height: 58,
     zIndex: 20,
+    elevation: 20,
+    alignItems: "center",
+  },
+
+  seletorPersonagem: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  seletorTitulo: {
+    color: "#242B67",
+    fontSize: 12,
+    fontWeight: "800",
+    marginRight: 2,
+  },
+  botaoPersonagem: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#DCE2F0",
+    backgroundColor: "#F2F4F8",
+  },
+  botaoPersonagemAtivo: {
+    backgroundColor: "#242B67",
+    borderColor: "#242B67",
+  },
+  textoBotaoPersonagem: {
+    color: "#242B67",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  textoBotaoPersonagemAtivo: {
+    color: "#FFFFFF",
   },
 
   /* ÁRVORES */
